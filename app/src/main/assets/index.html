@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Sejltur Regnskab</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#18212b;--muted:#6c7782;--line:#e3e8ee;--accent:#0e7490;--accent2:#155e75;--danger:#b42318;--good:#067647;--shadow:0 8px 24px rgba(16,24,40,.07)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:92px}header{position:sticky;top:0;z-index:3;background:rgba(244,246,248,.94);backdrop-filter:blur(10px);padding:18px 16px 10px;border-bottom:1px solid rgba(227,232,238,.8)}h1{font-size:24px;margin:0 0 4px}header p{margin:0;color:var(--muted);font-size:13px}.wrap{max-width:760px;margin:0 auto;padding:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:12px 0 8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}label{display:block;font-size:12px;color:var(--muted);font-weight:650;margin-bottom:5px}input,select,button,textarea{font:inherit}input,select,textarea{width:100%;border:1px solid #cfd8e3;border-radius:12px;padding:11px 12px;background:#fff;color:var(--text)}input:focus,select:focus,textarea:focus{outline:2px solid rgba(14,116,144,.18);border-color:var(--accent)}button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:white}.primary:active{background:var(--accent2)}.secondary{background:#eaf3f5;color:var(--accent2)}.danger{background:#fff0ee;color:var(--danger)}.ghost{background:#f5f7f9;color:#344054}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.item{border-top:1px solid var(--line);padding:12px 0}.item:first-of-type{border-top:0}.item-title{display:flex;justify-content:space-between;gap:10px;font-weight:750}.item-sub{font-size:13px;color:var(--muted);margin-top:3px}.money{font-variant-numeric:tabular-nums}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:750;background:#edf2f7;color:#475467}.summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0;border-top:1px solid var(--line)}.summary:first-of-type{border-top:0}.summary-name{font-weight:800}.summary-total{font-weight:850;font-size:20px}.good{color:var(--good)}.warning{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px 12px;border-radius:12px;font-size:13px;margin-top:10px}.empty{color:var(--muted);font-size:14px;padding:6px 0}.switchline{display:flex;align-items:center;justify-content:space-between;gap:12px}.switchline input{width:22px;height:22px}.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.nav button{padding:8px 2px;background:transparent;color:#667085;font-size:11px;border-radius:10px}.nav button.active{background:#eaf3f5;color:var(--accent2)}.nav span{display:block;font-size:20px;line-height:20px;margin-bottom:3px}.view{display:none}.view.active{display:block}.trip-selector{margin-top:10px}.small{font-size:12px;color:var(--muted)}details{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}summary{font-weight:700;cursor:pointer}.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}@media(max-width:520px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.card{border-radius:16px;padding:14px}.wrap{padding:10px}.summary-total{font-size:18px}}
+</style>
+</head>
+<body>
+<header><h1>⛵ Sejltur Regnskab</h1><p id="headerTrip">Ingen aktiv sejltur endnu</p><div class="trip-selector"><select id="tripSelect" onchange="selectTrip(this.value)"></select></div></header>
+<main class="wrap">
+<section id="view-trips" class="view active">
+  <div class="card"><h2>Ny sejltur</h2><div class="grid">
+    <div class="full"><label>Navn</label><input id="tripName" placeholder="Fx Hven & Vedbæk" /></div>
+    <div><label>Startdato</label><input id="tripStart" type="date" /></div><div><label>Slutdato</label><input id="tripEnd" type="date" /></div>
+    <div><label>Dagspris pr. gæst</label><input id="tripRate" type="number" inputmode="decimal" value="150" min="0" step="0.01" /></div>
+    <div><label>Dit navn</label><input id="ownerName" value="Johan" /></div>
+    <div class="full switchline"><div><strong>Medregn mig i udgiftsdelingen</strong><div class="small">Så betaler gæsterne kun deres egen andel.</div></div><input id="includeOwner" type="checkbox" checked /></div>
+    <div class="full"><button class="primary" onclick="createTrip()">Opret sejltur</button></div>
+  </div></div>
+  <div class="card"><h2>Dine sejlture</h2><div id="tripList"></div></div>
+</section>
+
+<section id="view-people" class="view">
+  <div class="card"><h2>Tilføj person</h2><div class="grid">
+    <div class="full"><label>Navn</label><input id="personName" placeholder="Fx Sarah" /></div>
+    <div><label>Ankommer</label><input id="personArrival" type="date" /></div><div><label>Tager hjem</label><input id="personDeparture" type="date" /></div>
+    <div class="full"><button class="primary" onclick="addPerson()">Tilføj person</button></div>
+  </div><div class="small" style="margin-top:8px">Ankomst- og afrejsedag tæller begge som dage ombord.</div></div>
+  <div class="card"><h2>Personer</h2><div id="peopleList"></div></div>
+</section>
+
+<section id="view-expenses" class="view">
+  <div class="card"><h2>Tilføj udgift</h2><div class="grid">
+    <div><label>Dato</label><input id="expenseDate" type="date" /></div>
+    <div><label>Kategori</label><select id="expenseCategory"><option>Mad</option><option>Drikkevarer</option><option>Havnepenge</option><option>Brændstof</option><option>Andet</option></select></div>
+    <div class="full"><label>Beskrivelse</label><input id="expenseDescription" placeholder="Fx indkøb i Netto" /></div>
+    <div><label>Beløb (kr.)</label><input id="expenseAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" /></div>
+    <div style="display:flex;align-items:end"><button class="primary" style="width:100%" onclick="addExpense()">Tilføj udgift</button></div>
+  </div></div>
+  <div class="card"><h2>Udgifter</h2><div id="expenseList"></div></div>
+</section>
+
+<section id="view-summary" class="view">
+  <div class="card"><h2>Hvem skylder hvad?</h2><div id="summaryList"></div><div id="unallocated"></div></div>
+  <div class="card"><h2>Turens totaler</h2><div id="tripTotals"></div></div>
+</section>
+
+<section id="view-settings" class="view">
+  <div class="card"><h2>Indstillinger for aktiv tur</h2><div class="grid">
+    <div><label>Dagspris pr. gæst</label><input id="settingsRate" type="number" min="0" step="0.01" /></div>
+    <div><label>Dit navn</label><input id="settingsOwner" /></div>
+    <div class="full switchline"><div><strong>Medregn mig i udgiftsdelingen</strong><div class="small">Din andel trækkes indirekte fra gæsternes betaling.</div></div><input id="settingsIncludeOwner" type="checkbox" /></div>
+    <div class="full"><button class="primary" onclick="saveSettings()">Gem indstillinger</button></div>
+  </div></div>
+  <div class="card"><h2>Backup</h2><p class="small">Alt gemmes kun lokalt på telefonen. Eksportér en JSON-backup, hvis du vil kunne gendanne data senere.</p><div class="row"><button class="secondary" onclick="exportBackup()">Eksportér backup</button><button class="ghost" onclick="document.getElementById('importFile').click()">Importér backup</button></div><input id="importFile" type="file" accept="application/json,.json" hidden onchange="importBackup(event)" /></div>
+  <div class="card"><h2>Farlig zone</h2><button class="danger" onclick="deleteActiveTrip()">Slet aktiv sejltur</button></div>
+</section>
+</main>
+
+<nav class="nav">
+<button data-view="trips" class="active" onclick="showView('trips')"><span>🗺️</span>Ture</button>
+<button data-view="people" onclick="showView('people')"><span>👥</span>Personer</button>
+<button data-view="expenses" onclick="showView('expenses')"><span>🧾</span>Udgifter</button>
+<button data-view="summary" onclick="showView('summary')"><span>💰</span>Oversigt</button>
+<button data-view="settings" onclick="showView('settings')"><span>⚙️</span>Indstillinger</button>
+</nav>
+
+<script>
+const STORAGE_KEY='sejltur-regnskab-v1';
+let state=loadState();
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&Array.isArray(s.trips))return s}catch(e){}return{activeTripId:null,trips:[]}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderAll()}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function activeTrip(){return state.trips.find(t=>t.id===state.activeTripId)||null}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function money(n){return new Intl.NumberFormat('da-DK',{style:'currency',currency:'DKK',minimumFractionDigits:2}).format(Number(n)||0)}
+function fmtDate(s){if(!s)return'';const [y,m,d]=s.split('-');return `${d}.${m}.${y}`}
+function inRange(d,a,b){return d>=a&&d<=b}
+function daysInclusive(a,b){if(!a||!b||b<a)return 0;const da=new Date(a+'T12:00:00'),db=new Date(b+'T12:00:00');return Math.round((db-da)/86400000)+1}
+function overlapDays(a1,a2,b1,b2){const s=a1>b1?a1:b1,e=a2<b2?a2:b2;return s<=e?daysInclusive(s,e):0}
+function setDefaultDates(){const t=activeTrip();if(!t)return;['personArrival','expenseDate'].forEach(id=>{const el=document.getElementById(id);if(!el.value)el.value=t.startDate});const dep=document.getElementById('personDeparture');if(!dep.value)dep.value=t.endDate}
+function createTrip(){const name=document.getElementById('tripName').value.trim(),startDate=document.getElementById('tripStart').value,endDate=document.getElementById('tripEnd').value;if(!name||!startDate||!endDate)return alert('Udfyld navn, startdato og slutdato.');if(endDate<startDate)return alert('Slutdato skal være efter startdato.');const trip={id:uid(),name,startDate,endDate,dailyRate:Number(document.getElementById('tripRate').value)||0,ownerName:document.getElementById('ownerName').value.trim()||'Mig',includeOwner:document.getElementById('includeOwner').checked,people:[],expenses:[]};state.trips.unshift(trip);state.activeTripId=trip.id;document.getElementById('tripName').value='';save();showView('people');setDefaultDates()}
+function selectTrip(id){state.activeTripId=id||null;save();setDefaultDates()}
+function addPerson(){const t=activeTrip();if(!t)return alert('Opret først en sejltur.');const name=document.getElementById('personName').value.trim(),arrival=document.getElementById('personArrival').value,departure=document.getElementById('personDeparture').value;if(!name||!arrival||!departure)return alert('Udfyld navn og datoer.');if(departure<arrival)return alert('Afrejsedato skal være efter ankomstdato.');t.people.push({id:uid(),name,arrival,departure});document.getElementById('personName').value='';save()}
+function removePerson(id){const t=activeTrip();if(!t)return;if(confirm('Fjern personen fra turen?')){t.people=t.people.filter(p=>p.id!==id);save()}}
+function addExpense(){const t=activeTrip();if(!t)return alert('Opret først en sejltur.');const date=document.getElementById('expenseDate').value,category=document.getElementById('expenseCategory').value,description=document.getElementById('expenseDescription').value.trim(),amount=Number(document.getElementById('expenseAmount').value);if(!date||!amount||amount<=0)return alert('Udfyld dato og et beløb større end 0.');t.expenses.push({id:uid(),date,category,description,amount});document.getElementById('expenseDescription').value='';document.getElementById('expenseAmount').value='';save()}
+function removeExpense(id){const t=activeTrip();if(!t)return;if(confirm('Slet udgiften?')){t.expenses=t.expenses.filter(e=>e.id!==id);save()}}
+function calculation(t){const result={};t.people.forEach(p=>result[p.id]={person:p,expenseShare:0,days:overlapDays(p.arrival,p.departure,t.startDate,t.endDate),dailyFee:0,total:0,expenseLines:[]});let unallocated=0;t.expenses.forEach(e=>{const guests=t.people.filter(p=>inRange(e.date,p.arrival,p.departure));const divisor=guests.length+(t.includeOwner?1:0);if(divisor===0){unallocated+=e.amount;return}const share=e.amount/divisor;guests.forEach(p=>{result[p.id].expenseShare+=share;result[p.id].expenseLines.push({expense:e,share})})});Object.values(result).forEach(r=>{r.dailyFee=r.days*(Number(t.dailyRate)||0);r.total=r.expenseShare+r.dailyFee});return{people:Object.values(result),unallocated}}
+function saveSettings(){const t=activeTrip();if(!t)return alert('Ingen aktiv tur.');t.dailyRate=Number(document.getElementById('settingsRate').value)||0;t.ownerName=document.getElementById('settingsOwner').value.trim()||'Mig';t.includeOwner=document.getElementById('settingsIncludeOwner').checked;save();alert('Indstillinger gemt.')}
+function deleteActiveTrip(){const t=activeTrip();if(!t)return;if(confirm(`Slet “${t.name}” og alle dens data?`)){state.trips=state.trips.filter(x=>x.id!==t.id);state.activeTripId=state.trips[0]?.id||null;save();showView('trips')}}
+function exportBackup(){const json=JSON.stringify(state,null,2);if(window.Android&&Android.exportBackup){Android.exportBackup(json)}else{const blob=new Blob([json],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sejltur-regnskab-backup.json';a.click();URL.revokeObjectURL(a.href)}}
+function importBackup(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);if(!incoming||!Array.isArray(incoming.trips))throw new Error('Ugyldigt format');if(confirm('Erstat alle nuværende data med denne backup?')){state=incoming;save();alert('Backup importeret.')}}catch(e){alert('Kunne ikke importere backup: '+e.message)}ev.target.value=''};r.readAsText(f)}
+function showView(name){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));renderAll();setDefaultDates()}
+function renderAll(){const t=activeTrip();const select=document.getElementById('tripSelect');select.innerHTML=state.trips.length?state.trips.map(x=>`<option value="${x.id}" ${x.id===state.activeTripId?'selected':''}>${esc(x.name)} · ${fmtDate(x.startDate)}–${fmtDate(x.endDate)}</option>`).join(''):'<option value="">Ingen sejlture</option>';document.getElementById('headerTrip').textContent=t?`${t.name} · ${fmtDate(t.startDate)}–${fmtDate(t.endDate)}`:'Ingen aktiv sejltur endnu';renderTrips();renderPeople();renderExpenses();renderSummary();if(t){document.getElementById('settingsRate').value=t.dailyRate;document.getElementById('settingsOwner').value=t.ownerName;document.getElementById('settingsIncludeOwner').checked=!!t.includeOwner}}
+function renderTrips(){const box=document.getElementById('tripList');if(!state.trips.length){box.innerHTML='<div class="empty">Du har ikke oprettet nogen sejlture endnu.</div>';return}box.innerHTML=state.trips.map(t=>`<div class="item"><div class="item-title"><span>${esc(t.name)}</span><span class="badge">${t.people.length} personer</span></div><div class="item-sub">${fmtDate(t.startDate)} – ${fmtDate(t.endDate)} · ${money(t.dailyRate)}/gæst/dag</div><div style="margin-top:8px"><button class="${t.id===state.activeTripId?'secondary':'ghost'}" onclick="selectTrip('${t.id}')">${t.id===state.activeTripId?'Aktiv tur':'Vælg tur'}</button></div></div>`).join('')}
+function renderPeople(){const t=activeTrip(),box=document.getElementById('peopleList');if(!t){box.innerHTML='<div class="empty">Vælg eller opret en tur.</div>';return}if(!t.people.length){box.innerHTML='<div class="empty">Ingen personer tilføjet endnu.</div>';return}box.innerHTML=t.people.map(p=>`<div class="item"><div class="item-title"><span>${esc(p.name)}</span><button class="danger" style="flex:0;padding:6px 9px" onclick="removePerson('${p.id}')">Slet</button></div><div class="item-sub">${fmtDate(p.arrival)} – ${fmtDate(p.departure)} · ${overlapDays(p.arrival,p.departure,t.startDate,t.endDate)} dage på turen</div></div>`).join('')}
+function renderExpenses(){const t=activeTrip(),box=document.getElementById('expenseList');if(!t){box.innerHTML='<div class="empty">Vælg eller opret en tur.</div>';return}if(!t.expenses.length){box.innerHTML='<div class="empty">Ingen udgifter endnu.</div>';return}const items=[...t.expenses].sort((a,b)=>b.date.localeCompare(a.date));box.innerHTML=items.map(e=>{const present=t.people.filter(p=>inRange(e.date,p.arrival,p.departure));const divisor=present.length+(t.includeOwner?1:0);return `<div class="item"><div class="item-title"><span>${esc(e.description||e.category)}</span><span class="money">${money(e.amount)}</span></div><div class="item-sub">${fmtDate(e.date)} · ${esc(e.category)} · deles mellem ${divisor} ${divisor===1?'person':'personer'}</div><div class="pillrow">${present.map(p=>`<span class="badge">${esc(p.name)}</span>`).join('')}${t.includeOwner?`<span class="badge">${esc(t.ownerName||'Mig')}</span>`:''}</div><button class="danger" style="margin-top:8px;padding:6px 9px" onclick="removeExpense('${e.id}')">Slet</button></div>`}).join('')}
+function renderSummary(){const t=activeTrip(),box=document.getElementById('summaryList'),totals=document.getElementById('tripTotals'),warn=document.getElementById('unallocated');if(!t){box.innerHTML=totals.innerHTML='<div class="empty">Vælg eller opret en tur.</div>';warn.innerHTML='';return}const c=calculation(t);if(!c.people.length)box.innerHTML='<div class="empty">Tilføj personer for at se en oversigt.</div>';else box.innerHTML=c.people.map(r=>`<div class="summary"><div><div class="summary-name">${esc(r.person.name)}</div><div class="item-sub">Udgifter: ${money(r.expenseShare)} · Dagspris: ${r.days} × ${money(t.dailyRate)} = ${money(r.dailyFee)}</div><details><summary>Se detaljer</summary>${r.expenseLines.length?r.expenseLines.map(l=>`<div class="item-sub" style="margin-top:6px">${fmtDate(l.expense.date)} · ${esc(l.expense.description||l.expense.category)}: ${money(l.share)}</div>`).join(''):'<div class="item-sub">Ingen delte udgifter.</div>'}</details></div><div class="summary-total good">${money(r.total)}</div></div>`).join('');warn.innerHTML=c.unallocated>0?`<div class="warning">${money(c.unallocated)} i udgifter kunne ikke fordeles, fordi ingen gæster var registreret som ombord den dag${t.includeOwner?' (din egen andel er dog registreret i divisor, når du er medregnet)':''}.</div>`:'';const expenseTotal=t.expenses.reduce((s,e)=>s+Number(e.amount||0),0),guestFees=c.people.reduce((s,r)=>s+r.dailyFee,0),guestExpenseShares=c.people.reduce((s,r)=>s+r.expenseShare,0),guestTotal=c.people.reduce((s,r)=>s+r.total,0);totals.innerHTML=`<div class="item"><div class="item-title"><span>Samlede udgifter</span><span>${money(expenseTotal)}</span></div></div><div class="item"><div class="item-title"><span>Gæsternes andel af udgifter</span><span>${money(guestExpenseShares)}</span></div><div class="item-sub">${t.includeOwner?'Din egen andel er ikke opkrævet hos gæsterne.':'Du er ikke medregnet i fordelingen.'}</div></div><div class="item"><div class="item-title"><span>Dagspriser i alt</span><span>${money(guestFees)}</span></div></div><div class="item"><div class="item-title"><span>Gæster skylder samlet</span><span class="good">${money(guestTotal)}</span></div></div>`}
+renderAll();
+</script>
+</body>
+</html>
